@@ -1,0 +1,20 @@
+name: RPServer
+version: '${version}'
+main: zxc.mrdrag0nxyt.rpserver.RPServer
+api-version: '1.16'
+
+commands:
+  rpserver:
+    aliases: [ rps ]
+
+permissions:
+  rpserver.*:
+    default: op
+    children:
+      rpserver.reload: true
+      rpserver.link: true
+
+  rpserver.reload:
+    default: op
+  rpserver.link:
+    default: op
