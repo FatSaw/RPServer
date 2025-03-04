@@ -13,8 +13,11 @@ permissions:
     children:
       rpserver.reload: true
       rpserver.link: true
+      rpserver.hash: true
 
   rpserver.reload:
     default: op
   rpserver.link:
+    default: op
+  rpserver.hash:
     default: op
