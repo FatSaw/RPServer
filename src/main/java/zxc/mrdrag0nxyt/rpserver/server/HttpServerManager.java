@@ -1,6 +1,7 @@
 package zxc.mrdrag0nxyt.rpserver.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -66,8 +67,7 @@ public class HttpServerManager extends Thread {
 				try {
 					byte[] header = this.header, data = this.data;
 					Socket socket = server.accept();
-					socket.shutdownInput();
-					new ResponseSender(socket.getOutputStream(), header, data).start();
+					new ResponseSender(socket.getInputStream(), socket.getOutputStream(), header, data).start();
 				} catch (IOException e) {
 				}
 			}
@@ -123,10 +123,12 @@ public class HttpServerManager extends Thread {
     
     private final static class ResponseSender extends Thread {
     	
+    	private final InputStream is;
     	private final OutputStream os;
     	private final byte[] response, data;
     	
-    	protected ResponseSender(OutputStream os, byte[] header, byte[] data) {
+    	protected ResponseSender(InputStream is, OutputStream os, byte[] header, byte[] data) {
+    		this.is = is;
     		this.os = os;
     		this.response = header;
     		this.data = data;
@@ -134,6 +136,11 @@ public class HttpServerManager extends Thread {
     	
     	@Override
         public void run() {
+    		byte[] buf = new byte[512];
+    		try {
+    			is.read(buf);
+    		} catch (IOException e1) {
+    		}
     		try {
 				os.write(this.response);
 				os.write(this.data);
