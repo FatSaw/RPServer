@@ -1,102 +1,150 @@
 package zxc.mrdrag0nxyt.rpserver.server;
 
-import fi.iki.elonen.NanoHTTPD;
-import org.bukkit.scheduler.BukkitRunnable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
 
 import zxc.mrdrag0nxyt.rpserver.CachedResourcePack;
-import zxc.mrdrag0nxyt.rpserver.RPServer;
-import zxc.mrdrag0nxyt.rpserver.config.Config;
 
-public class HttpServerManager {
+public class HttpServerManager extends Thread {
 
-    private final RPServer plugin;
+    private final Logger logger;
     private final CachedResourcePack resourcepack;
-    private final Config config;
+    
+    private int port;
+    
+    private byte[] header;
+    private byte[] data;
+    
+    private ServerSocket server;
+    private volatile boolean run;
 
-    private HttpServer httpServer;
-    private BukkitRunnable runnable;
-
-    public HttpServerManager(RPServer plugin, CachedResourcePack resourcepack, Config config) {
-        this.plugin = plugin;
+    public HttpServerManager(Logger logger, CachedResourcePack resourcepack, int port) {
+        this.logger = logger;
         this.resourcepack = resourcepack;
-        this.config = config;
+        restartServer(port);
+    }
+    
+    @Override
+    public void start() {
+    	this.run = true;
+    	super.start();
+    }
+    
+    public void end() {
+    	this.run = false;
+    	if(server == null) {
+    		return;
+    	}
+    	try {
+			server.close();
+		} catch (IOException e) {
+		}
+    }
+    
+    @Override
+    public void run() {
+    	while(run) {
+    		try {
+    			server = new ServerSocket();
+    			server.setSoTimeout(5000);
+    			server.bind(new InetSocketAddress(port), 0);
+    			logger.info("HTTP server started at http://0.0.0.0:" + port + ". Use '/rpserver link' to get link");
+    		} catch (IOException|SecurityException|IllegalArgumentException e) {
+    			e.printStackTrace();
+    			return;
+    		}
+    		try {
+				sleep(1000);
+			} catch (InterruptedException e) {
+			}
+			while (!server.isClosed()) {
+				try {
+					byte[] header = this.header, data = this.data;
+					Socket socket = server.accept();
+					socket.shutdownInput();
+					new ResponseSender(socket.getOutputStream(), header, data).start();
+				} catch (IOException e) {
+				}
+			}
+    	}
     }
 
-
-    public synchronized void startServer() {
-        if (httpServer != null && httpServer.isAlive()) return;
-
-        runnable = new BukkitRunnable() {
-            @Override
-            public void run() {
-
-                try {
-                	int port = config.getPort();
-                    httpServer = new HttpServer(port, resourcepack);
-                    httpServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-                    plugin.getLogger().info("HTTP server started at http://0.0.0.0:" + port + ". Use '/rpserver link' to get link");
-                } catch (Exception e) {
-                    plugin.getLogger().severe(e.getMessage());
-                }
-
-            }
-        };
-        runnable.runTaskAsynchronously(plugin);
-    }
-
-    public synchronized void stopServer() {
-        if (httpServer == null) return;
-
-        try {
-            httpServer.stop();
-            plugin.getLogger().info("HTTP server stopped.");
-
-        } catch (Exception e) {
-            plugin.getLogger().severe(e.getMessage());
-        }
-
-        if (runnable != null) runnable.cancel();
-    }
-
-    public void reloadServer() {
-        stopServer();
-        startServer();
-    }
-
-    private class HttpServer extends NanoHTTPD {
+    public void restartServer(int port) {
+    	this.port = port;
     	
-        private final CachedResourcePack resourcepack;
-    	private String hash = null;
-    	private Response response = null;
-
-        public HttpServer(int port, CachedResourcePack resourcepack) {
-            super(port);
-            this.resourcepack = resourcepack;
-            updateResponse();
-        }
-        
-        private void updateResponse() {
-        	String hash = resourcepack.getHash();
-        	if(hash == this.hash) {
-        		return;
-        	}
-        	final Response response;
-        	if(resourcepack.getLength() == 0) {
-        		plugin.getLogger().severe("File not found!");
-        		response = newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "File not found!");
-        	} else {
-        		response = newFixedLengthResponse(Response.Status.OK, "application/zip", resourcepack.getStream(), resourcepack.getLength());
-            	response.addHeader("Content-Disposition", "attachment; filename=\"" + resourcepack.getFile().getName() + "\"");
-        	}
-        	this.hash = hash;
-        	this.response = response;
-        }
-
-        @Override
-        public Response serve(IHTTPSession session) {
-        	updateResponse();
-        	return response;
-        }
+    	byte[] pack = resourcepack.getPack();
+    	if(pack.length == 0) {
+    		this.data = "File not found!".getBytes(StandardCharsets.US_ASCII);
+    		StringBuilder sb = new StringBuilder();
+        	sb.append("HTTP/1.1 200 OK");
+        	sb.append("\r\n");
+        	sb.append("Content-Type: text/plain");
+        	sb.append("\r\n");
+        	sb.append("Connection: close");
+        	sb.append("\r\n");
+        	sb.append("Content-Length: ");
+        	sb.append(data.length);
+        	sb.append("\r\n");
+        	sb.append("\r\n");
+        	this.header = sb.toString().getBytes(StandardCharsets.US_ASCII);
+    	} else {
+    		this.data = pack;
+    		StringBuilder sb = new StringBuilder();
+        	sb.append("HTTP/1.1 200 OK");
+        	sb.append("\r\n");
+        	sb.append("Content-Type: application/zip");
+        	sb.append("\r\n");
+        	sb.append("Connection: close");
+        	sb.append("\r\n");
+        	sb.append("Content-Disposition: attachment; filename=\"");
+        	sb.append(resourcepack.getFile().getName());
+        	sb.append("\"");
+        	sb.append("\r\n");
+        	sb.append("Content-Length: ");
+        	sb.append(pack.length);
+        	sb.append("\r\n");
+        	sb.append("\r\n");
+        	this.header = sb.toString().getBytes(StandardCharsets.UTF_8);
+    	}
+    	
+    	if(server == null) {
+    		return;
+    	}
+    	try {
+			server.close();
+		} catch (IOException e) {
+		}
+    }
+    
+    private final static class ResponseSender extends Thread {
+    	
+    	private final OutputStream os;
+    	private final byte[] response, data;
+    	
+    	protected ResponseSender(OutputStream os, byte[] header, byte[] data) {
+    		this.os = os;
+    		this.response = header;
+    		this.data = data;
+    	}
+    	
+    	@Override
+        public void run() {
+    		try {
+				os.write(this.response);
+				os.write(this.data);
+				os.close();
+			} catch (IOException e1) {
+				try {
+					os.close();
+				} catch (IOException e2) {
+				}
+			}
+    	}
     }
 
 }

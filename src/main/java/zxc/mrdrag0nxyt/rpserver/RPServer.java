@@ -21,22 +21,22 @@ public final class RPServer extends JavaPlugin {
         resourcepack.setFile(new File(getDataFolder(), config.getResourcePackFileName()));
         getCommand("rpserver").setExecutor(new PluginCommand(this, config, resourcepack));
 
-        server = new HttpServerManager(this, resourcepack, config);
-        server.startServer();
+        server = new HttpServerManager(this.getLogger(), resourcepack, config.getPort());
+        server.start();
 
         sendTitle(true);
     }
 
     @Override
     public void onDisable() {
-        server.stopServer();
+        server.end();
         sendTitle(false);
     }
 
     public void reload() {
         config.reload();
         resourcepack.setFile(new File(getDataFolder(), config.getResourcePackFileName()));
-        server.reloadServer();
+        server.restartServer(config.getPort());
     }
 
     private void sendTitle(boolean isEnable) {

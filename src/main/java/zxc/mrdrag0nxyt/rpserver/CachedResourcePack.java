@@ -21,6 +21,7 @@ public final class CachedResourcePack {
 	@Getter
 	private int length;
 	
+	@Getter
 	private byte[] pack;
 	
 	@Getter
@@ -79,10 +80,6 @@ public final class CachedResourcePack {
 	public void setFile(File file) {
 		this.file = file;
 		update();
-	}
-	
-	public InputStream getStream() {
-		return new ByteArrayInputStream(pack);
 	}
 	
 }
