@@ -67,18 +67,14 @@ public class PluginCommand implements CommandExecutor, TabCompleter {
 
 
     private boolean noPermission(CommandSender commandSender) {
-        commandSender.sendMessage(
-                Utilities.colorize(config.getNoPermissionMessage())
-        );
+        commandSender.sendMessage(config.getNoPermissionMessage());
         return false;
     }
 
 
     private boolean usage(CommandSender commandSender) {
         for (String str : config.getUsageMessage()) {
-            commandSender.sendMessage(
-                    Utilities.colorize(str)
-            );
+            commandSender.sendMessage(str);
         }
         return false;
     }
@@ -87,31 +83,21 @@ public class PluginCommand implements CommandExecutor, TabCompleter {
         if (!commandSender.hasPermission("rpserver.reload")) return noPermission(commandSender);
 
         plugin.reload();
-        commandSender.sendMessage(
-                Utilities.colorize(config.getReloadedMessage())
-        );
+        commandSender.sendMessage(config.getReloadedMessage());
         return true;
     }
 
     private boolean linkSubcommand(CommandSender commandSender) {
         if (!commandSender.hasPermission("rpserver.link")) return noPermission(commandSender);
 
-        commandSender.sendMessage(
-                Utilities.colorize(
-                        config.getLinkMessage()
-                                .replace("%domain%", config.getDomain())
-                                .replace("%port%", String.valueOf(config.getPort()))
-                )
-        );
+        commandSender.sendMessage(config.getLinkMessage());
         return true;
     }
     
     private boolean hashSubcommand(CommandSender commandSender) {
     	if (!commandSender.hasPermission("rpserver.hash")) return noPermission(commandSender);
     	String hash = resourcepack.getHash();
-    	commandSender.sendMessage(
-                Utilities.colorize(config.getHashMessage().replace("%hash%", hash))
-        );
+    	commandSender.sendMessage(Utilities.colorize(config.getHashMessage().replace("%hash%", hash)));
         return true;
     }
 
