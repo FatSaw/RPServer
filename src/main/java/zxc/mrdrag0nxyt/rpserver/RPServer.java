@@ -11,7 +11,7 @@ import zxc.mrdrag0nxyt.rpserver.util.Utilities;
 
 public final class RPServer extends JavaPlugin {
     private Config config;
-	private CachedResourcePack resourcepack;
+    private CachedResourcePack resourcepack;
     private HttpServerManager server;
 
     @Override

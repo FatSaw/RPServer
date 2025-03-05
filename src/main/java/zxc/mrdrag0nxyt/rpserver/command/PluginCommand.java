@@ -49,18 +49,18 @@ public class PluginCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         if (strings.length == 1) {
-        	List<String> list = new ArrayList<>(3);
-        	String arg0 = strings[0].toLowerCase();
-			if ("reload".startsWith(arg0)) {
-				list.add("reload");
-			}
-			if ("link".startsWith(arg0)) {
-				list.add("link");
-			}
-			if ("hash".startsWith(arg0)) {
-				list.add("hash");
-			}
-			return list;
+            List<String> list = new ArrayList<>(3);
+            String arg0 = strings[0].toLowerCase();
+            if ("reload".startsWith(arg0)) {
+                list.add("reload");
+            }
+            if ("link".startsWith(arg0)) {
+                list.add("link");
+            }
+            if ("hash".startsWith(arg0)) {
+                list.add("hash");
+            }
+            return list;
         }
         return Collections.emptyList();
     }
@@ -93,11 +93,11 @@ public class PluginCommand implements CommandExecutor, TabCompleter {
         commandSender.sendMessage(config.getLinkMessage());
         return true;
     }
-    
+
     private boolean hashSubcommand(CommandSender commandSender) {
-    	if (!commandSender.hasPermission("rpserver.hash")) return noPermission(commandSender);
-    	String hash = resourcepack.getHash();
-    	commandSender.sendMessage(Utilities.colorize(config.getHashMessage().replace("%hash%", hash)));
+        if (!commandSender.hasPermission("rpserver.hash")) return noPermission(commandSender);
+        String hash = resourcepack.getHash();
+        commandSender.sendMessage(Utilities.colorize(config.getHashMessage().replace("%hash%", hash)));
         return true;
     }
 

@@ -28,13 +28,13 @@ public class Config {
     );
     @Getter
     private String noPermissionMessage = "&#d45079У вас недостаточно прав для выполнения этой команды!";
-    
+
     @Getter
     private String reloadedMessage = "&#ace1afПлагин успешно перезагружен!";
-    
+
     @Getter
     private String linkMessage = "&#745c97RPServer &#696969▸ &#fcfcfcСсылка на скачивание ресурспака: &#745c97http://%domain%:%port%/";
-    
+
     @Getter
     private String hashMessage = "&#745c97RPServer &#696969▸ &#fcfcfcХеш ресурспака: &#745c97%hash%";
 
@@ -78,19 +78,19 @@ public class Config {
         List<String> usageMessage = checkValue("messages.usage", this.usageMessage);
         List<String> newusageMessage = new ArrayList<>(usageMessage.size());
         for (String str : usageMessage) {
-    		newusageMessage.add(Utilities.colorize(str));
+            newusageMessage.add(Utilities.colorize(str));
         }
         this.usageMessage = newusageMessage;
-        
+
         String noPermissionMessage = checkValue("messages.noPermission", this.noPermissionMessage);
         this.noPermissionMessage = Utilities.colorize(noPermissionMessage);
-        
+
         String reloadedMessage = checkValue("messages.reloaded", this.reloadedMessage);
         this.reloadedMessage = Utilities.colorize(reloadedMessage);
-        
+
         String linkMessage = checkValue("messages.link", this.linkMessage);
         this.linkMessage = Utilities.colorize(linkMessage.replace("%domain%", domain).replace("%port%", String.valueOf(port)));
-       
+
         this.hashMessage = checkValue("messages.hash", this.hashMessage);
 
         this.resourcePackFileName = checkValue("file", this.resourcePackFileName);

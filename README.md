@@ -24,10 +24,15 @@ file directly on your Spigot server!
 2. Add your resource pack ZIP file to folder `/plugins/RPServer/`
 3. Set file name and port in `config.yml` and reload with `/rpserver reload`
 4. Get link by `/rpserver link` and add it to `server.propeties` to `resource-pack` string
-5. Get sha1 hash by `/rpserver hash` and add it to `server.propeties` to `resource-pack-sha1` string
+5. Get SHA1 hash by `/rpserver hash` and add it to `server.propeties` to `resource-pack-sha1` string
 6. Restart server!
 
 ***
+
+# 👔 Contributors
+
+### Special thanks for contributors:
+- [FatSaw](https://github.com/FatSaw) - for refactor and web server improvement
 
 # ⚙ Other information
 
