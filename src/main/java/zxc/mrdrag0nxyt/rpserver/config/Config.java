@@ -3,6 +3,7 @@ package zxc.mrdrag0nxyt.rpserver.config;
 import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import zxc.mrdrag0nxyt.rpserver.RPServer;
+import zxc.mrdrag0nxyt.rpserver.util.Utilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,14 +23,20 @@ public class Config {
             "&#745c97RPServer &#696969- &#fcfcfcПомощь",
             " &#696969- &#745c97/rpserver reload &#696969- &#fcfcfcперезагрузить плагин",
             " &#696969- &#745c97/rpserver link &#696969- &#fcfcfcполучить ссылку на скачивание РП",
+            " &#696969- &#745c97/rpserver hash &#696969- &#fcfcfcполучить хеш",
             " "
     );
     @Getter
     private String noPermissionMessage = "&#d45079У вас недостаточно прав для выполнения этой команды!";
+    
     @Getter
     private String reloadedMessage = "&#ace1afПлагин успешно перезагружен!";
+    
     @Getter
     private String linkMessage = "&#745c97RPServer &#696969▸ &#fcfcfcСсылка на скачивание ресурспака: &#745c97http://%domain%:%port%/";
+    
+    @Getter
+    private String hashMessage = "&#745c97RPServer &#696969▸ &#fcfcfcХеш ресурспака: &#745c97%hash%";
 
     @Getter
     private String domain = "example.com";
@@ -68,15 +75,28 @@ public class Config {
     }
 
     private void updateConfig() {
-        usageMessage = checkValue("messages.usage", usageMessage);
-        noPermissionMessage = checkValue("messages.noPermission", noPermissionMessage);
-        reloadedMessage = checkValue("messages.reloaded", reloadedMessage);
-        linkMessage = checkValue("messages.link", linkMessage);
+        List<String> usageMessage = checkValue("messages.usage", this.usageMessage);
+        List<String> newusageMessage = new ArrayList<>(usageMessage.size());
+        for (String str : usageMessage) {
+    		newusageMessage.add(Utilities.colorize(str));
+        }
+        this.usageMessage = newusageMessage;
+        
+        String noPermissionMessage = checkValue("messages.noPermission", this.noPermissionMessage);
+        this.noPermissionMessage = Utilities.colorize(noPermissionMessage);
+        
+        String reloadedMessage = checkValue("messages.reloaded", this.reloadedMessage);
+        this.reloadedMessage = Utilities.colorize(reloadedMessage);
+        
+        String linkMessage = checkValue("messages.link", this.linkMessage);
+        this.linkMessage = Utilities.colorize(linkMessage.replace("%domain%", domain).replace("%port%", String.valueOf(port)));
+       
+        this.hashMessage = checkValue("messages.hash", this.hashMessage);
 
-        resourcePackFileName = checkValue("file", resourcePackFileName);
+        this.resourcePackFileName = checkValue("file", this.resourcePackFileName);
 
-        domain = checkValue("server.domain", domain);
-        port = checkValue("server.port", port);
+        this.domain = checkValue("server.domain", this.domain);
+        this.port = checkValue("server.port", this.port);
 
         save();
     }

@@ -1,5 +1,7 @@
 package zxc.mrdrag0nxyt.rpserver;
 
+import java.io.File;
+
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import zxc.mrdrag0nxyt.rpserver.command.PluginCommand;
@@ -8,32 +10,33 @@ import zxc.mrdrag0nxyt.rpserver.server.HttpServerManager;
 import zxc.mrdrag0nxyt.rpserver.util.Utilities;
 
 public final class RPServer extends JavaPlugin {
-
     private Config config;
+	private CachedResourcePack resourcepack;
     private HttpServerManager server;
 
     @Override
     public void onEnable() {
         config = new Config(this);
+        resourcepack = new CachedResourcePack();
+        resourcepack.setFile(new File(getDataFolder(), config.getResourcePackFileName()));
+        getCommand("rpserver").setExecutor(new PluginCommand(this, config, resourcepack));
 
-        getCommand("rpserver").setExecutor(new PluginCommand(this, config));
-
-        server = new HttpServerManager(this, config);
-        server.startServer();
+        server = new HttpServerManager(this.getLogger(), resourcepack, config.getPort());
+        server.start();
 
         sendTitle(true);
     }
 
     @Override
     public void onDisable() {
-        server.stopServer();
-
+        server.end();
         sendTitle(false);
     }
 
     public void reload() {
         config.reload();
-        server.reloadServer();
+        resourcepack.setFile(new File(getDataFolder(), config.getResourcePackFileName()));
+        server.restartServer(config.getPort());
     }
 
     private void sendTitle(boolean isEnable) {

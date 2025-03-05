@@ -21,9 +21,6 @@ repositories {
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
 
-    // https://mvnrepository.com/artifact/org.nanohttpd/nanohttpd
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
